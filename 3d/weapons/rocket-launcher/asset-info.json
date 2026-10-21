@@ -1,0 +1,20 @@
+{
+  "launcher_meshes": 166,
+  "launcher_triangles": 34972,
+  "rocket_meshes": 11,
+  "rocket_triangles": 2108,
+  "forward": "-X",
+  "up": "Z",
+  "units": "metres",
+  "validation_issues": [],
+  "materials": "PBR material colors; no baked texture maps",
+  "animations": "none; trigger and sockets are separate",
+  "launcher_export": {
+    "mesh_count": 2,
+    "triangles": 34972
+  },
+  "rocket_export": {
+    "mesh_count": 1,
+    "triangles": 2108
+  }
+}

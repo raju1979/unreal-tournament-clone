@@ -1,0 +1,26 @@
+{
+  "name": "Red Warden",
+  "asset": "red-warden.glb",
+  "source": "reference-inspired original low-poly model",
+  "height_m": 2.09,
+  "triangles": 3460,
+  "bones": 16,
+  "animations": [
+    "Warden_Idle",
+    "Warden_Fire",
+    "Warden_Jump",
+    "Warden_RunForward",
+    "Warden_RunForwardRight",
+    "Warden_RunRight",
+    "Warden_RunBackRight",
+    "Warden_RunBack",
+    "Warden_RunBackLeft",
+    "Warden_RunLeft",
+    "Warden_RunForwardLeft"
+  ],
+  "orientation": "Y-up glTF; facing direction corrected by the game model root",
+  "runtime": "Distance-driven directional locomotion; animated hand-mounted weapons; independent upper-body firing recoil; server-authoritative movement and collision",
+  "game_scale": 0.85,
+  "game_stride_m": 2.72,
+  "hand_socket": "Warden_WeaponSocket (child of hand.R)"
+}

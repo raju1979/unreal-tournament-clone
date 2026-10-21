@@ -1,0 +1,8 @@
+{
+  "stride_m": 3.2,
+  "game_scale": 0.85,
+  "game_stride_m": 2.72,
+  "forward": "Blender -Y / game +Z",
+  "hand_socket": "Warden_WeaponSocket",
+  "directions": 8
+}

@@ -1,0 +1,14 @@
+import {reactor,type Arena} from './maps';
+import {combatRules} from './combat';
+export type Input={f:number,s:number,yaw:number,pitch:number,jump:boolean,reload:boolean,fire:boolean,weapon:number,seq:number};
+export type Player={bot?:boolean,botState?:string,id:string,name:string,x:number,y:number,z:number,vy:number,yaw:number,pitch:number,hp:number,spawnShield:number,ammo:number,kills:number,deaths:number,weapon:number,hasLauncher:boolean,hasCarbine:boolean,carbineAmmo:number,launcherLoaded:number,carbineClip:number,reloadLeft:number,reloadWeapon:number,cool:number,respawn:number,seq:number};
+export const emptyInput=():Input=>({f:0,s:0,yaw:0,pitch:0,jump:false,reload:false,fire:false,weapon:1,seq:0});
+export function spawn(p:Player,map:Arena=reactor){const s=map.spawns[Math.floor(Math.random()*map.spawns.length)];Object.assign(p,{x:s[0],y:s[1],z:s[2],vy:0,yaw:s[3]??Math.atan2(-s[0],-s[2]),pitch:0,hp:100,spawnShield:combatRules.spawnShieldSeconds,ammo:0,hasLauncher:false,hasCarbine:false,carbineAmmo:0,launcherLoaded:0,carbineClip:0,reloadLeft:0,reloadWeapon:0,weapon:1,cool:0,respawn:0});}
+export function player(id:string,name:string):Player{const p={id,name,x:0,y:0,z:0,vy:0,yaw:0,pitch:0,hp:100,spawnShield:combatRules.spawnShieldSeconds,ammo:0,kills:0,deaths:0,weapon:1,hasLauncher:false,hasCarbine:false,carbineAmmo:0,launcherLoaded:0,carbineClip:0,reloadLeft:0,reloadWeapon:0,cool:0,respawn:0,seq:0};spawn(p);return p;}
+export function blocked(x:number,y:number,z:number,map:Arena){return map.boxes.some(b=>x+.38>b.x-b.w/2&&x-.38<b.x+b.w/2&&z+.38>b.z-b.d/2&&z-.38<b.z+b.d/2&&y+1.7>b.y-b.h/2+.01&&y<b.y+b.h/2-.01);}
+export function move(p:Player,i:Input,dt:number,map:Arena=reactor){if(p.hp<=0)return;p.yaw=i.yaw;p.pitch=i.pitch;p.weapon=(i.weapon===3&&!p.hasCarbine)||(i.weapon===2&&!p.hasLauncher)?1:i.weapon;p.seq=i.seq;
+ const len=Math.max(1,Math.hypot(i.f,i.s)),v=9;const dx=(Math.sin(i.yaw)*i.f+Math.cos(i.yaw)*i.s)/len*v*dt,dz=(Math.cos(i.yaw)*i.f-Math.sin(i.yaw)*i.s)/len*v*dt;
+ for(const axis of ['x','z'] as const){const d=axis==='x'?dx:dz;const nx=p.x+(axis==='x'?d:0),nz=p.z+(axis==='z'?d:0);if(!blocked(nx,p.y,nz,map)){p.x=nx;p.z=nz;}else if(p.vy<=0&&!blocked(nx,p.y+.4,nz,map)){p.x=nx;p.z=nz;p.y+=.4;}}
+ const grounded=blocked(p.x,p.y-.06,p.z,map);if(i.jump&&grounded)p.vy=8;p.vy-=22*dt;const ny=p.y+p.vy*dt;
+ if(!blocked(p.x,ny,p.z,map))p.y=ny;else{if(p.vy<0){const tops=map.boxes.filter(b=>p.x+.38>b.x-b.w/2&&p.x-.38<b.x+b.w/2&&p.z+.38>b.z-b.d/2&&p.z-.38<b.z+b.d/2&&b.y+b.h/2<=p.y+.41);if(tops.length)p.y=Math.max(...tops.map(b=>b.y+b.h/2));}p.vy=0;}if(p.y< -10){p.hp=0;p.respawn=2;p.deaths++;}}
+export function rayBox(o:number[],d:number[],min:number[],max:number[]){let lo=0,hi=120;for(let a=0;a<3;a++){if(Math.abs(d[a])<1e-8){if(o[a]<min[a]||o[a]>max[a])return Infinity;}else{let t=(min[a]-o[a])/d[a],u=(max[a]-o[a])/d[a];if(t>u)[t,u]=[u,t];lo=Math.max(lo,t);hi=Math.min(hi,u);if(hi<lo)return Infinity;}}return lo;}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+work/
+*.blend1
+.env
+
+3d/effects/rocket-explosion/cache/
+
+# Generated Blender simulation noise cache
+waveletNoiseTile.bin

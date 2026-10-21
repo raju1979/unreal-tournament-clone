@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {move,player,emptyInput,rayBox,blocked} from './game';import {reactor} from './maps';
+test('ground stays stable and jumping lands',()=>{const p=player('a','A');Object.assign(p,{x:0,y:0,z:18});for(let n=0;n<60;n++)move(p,emptyInput(),1/60);assert.equal(p.y,0);move(p,{...emptyInput(),jump:true},1/60);assert.ok(p.y>0);for(let n=0;n<120;n++)move(p,emptyInput(),1/60);assert.equal(p.y,0);});
+test('walls constrain movement and diagonal speed is normalized',()=>{const p=player('a','A');Object.assign(p,{x:0,y:0,z:18});for(let n=0;n<120;n++)move(p,{...emptyInput(),f:1},1/60);assert.ok(p.z<23);assert.ok(!blocked(p.x,p.y,p.z,reactor));const q=player('b','B');Object.assign(q,{x:0,y:0,z:18});move(q,{...emptyInput(),f:1,s:1},1/60);assert.ok(Math.abs(Math.hypot(q.x,q.z-18)-.15)<.001);});
+test('staircase reaches gallery',()=>{const p=player('a','A');Object.assign(p,{x:-17,y:0,z:22});for(let n=0;n<90;n++)move(p,{...emptyInput(),f:-1},1/60);assert.ok(p.y>=3.45,`height ${p.y}`);assert.ok(p.z<14,`z ${p.z}`);});
+test('ray collision distinguishes walls and misses',()=>{assert.equal(rayBox([0,1,0],[0,0,1],[-1,0,5],[1,2,6]),5);assert.equal(rayBox([5,1,0],[0,0,1],[-1,0,5],[1,2,6]),Infinity);});

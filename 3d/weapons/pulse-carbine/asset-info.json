@@ -1,0 +1,25 @@
+{
+  "name": "PC-01 Pulse Carbine",
+  "mesh_objects": 156,
+  "triangles": 27972,
+  "uv_layers": [
+    "UVMap"
+  ],
+  "length_metres": 1.28,
+  "blender_forward": "-X",
+  "materials": "PBR material colors, no baked texture maps",
+  "animation_parts": [
+    "PC01_MAGAZINE_ROOT",
+    "PC01_Trigger",
+    "PC01_Charging bolt"
+  ],
+  "attachments": [
+    "PC01_MUZZLE",
+    "PC01_GRIP_SOCKET",
+    "PC01_SUPPORT_HAND",
+    "PC01_EJECTION_PORT"
+  ],
+  "export_meshes": 4,
+  "export_triangles": 27972,
+  "validation_issues": []
+}

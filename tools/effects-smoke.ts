@@ -1,0 +1,11 @@
+import {NullEngine,Scene,TransformNode,Vector3} from '@babylonjs/core';
+import assert from 'node:assert/strict';import {CombatEffects} from '../client/combat-effects';
+const engine=new NullEngine(),scene=new Scene(engine),fx=new CombatEffects(scene),socket=new TransformNode('muzzle',scene);
+socket.position.set(2,1,3);fx.flash(socket,3);fx.shot(new Vector3(2,1,3),new Vector3(2,1,8),3,true,false);
+assert.ok(scene.meshes.some(m=>m.name==='FX muzzle flash'));assert.ok(scene.meshes.some(m=>m.name==='FX bullet tracer'));
+fx.update(.016);assert.ok(scene.meshes.find(m=>m.name==='FX bullet tracer')!.position.z>3);
+for(let i=0;i<8;i++)fx.update(.016);assert.ok(scene.meshes.some(m=>m.name==='FX impact spark'));
+for(let i=0;i<100;i++)fx.update(.016);assert.equal(scene.meshes.length,0);assert.equal(scene.getLightByName('FX / muzzle light')!.intensity,0);
+for(let i=0;i<100;i++)fx.flash(socket,1);assert.ok(scene.meshes.length<=160);fx.update(1);assert.equal(scene.meshes.length,0);
+fx.explosion(new Vector3(2,1,3));assert.ok(scene.meshes.some(m=>m.name==='FX smoke puff'));assert.ok(scene.meshes.some(m=>m.name==='FX shockwave'));assert.ok(!scene.meshes.some(m=>m.name==='Blast'));fx.update(.1);assert.ok(scene.meshes.some(m=>m.name==='FX fire puff'));for(let i=0;i<200;i++)fx.update(.016);assert.equal(scene.meshes.length,0);assert.equal(scene.getLightByName('FX / explosion light')!.intensity,0);
+scene.dispose();engine.dispose();console.log('PASS: muzzle/tracers, layered explosion, smoke/shockwave, bounded effects, lights and cleanup');
