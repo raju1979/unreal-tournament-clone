@@ -9,6 +9,8 @@ import {weaponStats} from '../shared/weapons';
 import {VillageEnvironment} from './village-environment';
 import {OutpostEnvironment} from './outpost-environment';
 import {CanyonEnvironment} from './canyon-environment';
+import {FortressEnvironment} from './fortress-environment';
+import {FoundryEnvironment} from './foundry-environment';
 import {BotAvatar} from './bot-avatar';
 const $=(id:string)=>document.getElementById(id)!;
 const canvas=$('game') as HTMLCanvasElement;
@@ -57,6 +59,8 @@ const canyonVisual=new TransformNode('Sunspire scenery',scene);canyonVisual.setE
 const canyonEnvironment=new CanyonEnvironment(scene,canyonVisual);
 const canyonModel=new TransformNode('Sunspire coordinate alignment',scene);canyonModel.parent=canyonVisual;canyonModel.scaling.x=-1;
 SceneLoader.LoadAssetContainerAsync('/assets/canyon/','sunspire-arena.glb',scene).then(asset=>{const instance=asset.instantiateModelsToScene(name=>'canyon-'+name,false);for(const root of instance.rootNodes)root.parent=canyonModel;canyonEnvironment.attachMeshes(canyonModel.getChildMeshes());}).catch(()=>feed('Sunspire scenery could not load. Run npm run build and refresh.'));
+const fortressEnvironment=new FortressEnvironment(scene);
+const foundryEnvironment=new FoundryEnvironment(scene);
 let pickupMeshes:Mesh[]=[];
 function makePickupMeshes(){
  for(const p of pickupMeshes)p.dispose();
@@ -71,7 +75,7 @@ function makePickupMeshes(){
   return m;
  });
 }
-function setArena(name:string){map=arenas[name]??arenas.village;reactorVisual.setEnabled(map.id==='reactor');villageVisual.setEnabled(map.id==='village');outpostVisual.setEnabled(map.id==='outpost');outpostEnvironment.setEnabled(map.id==='outpost');const outdoors=map.id==='village';const cold=map.id==='outpost',desert=map.id==='canyon';canyonVisual.setEnabled(desert);canyonEnvironment.setEnabled(desert);villageEnvironment.setEnabled(outdoors);scene.clearColor=outdoors?new Color4(.63,.84,.90,1):cold?new Color4(.67,.78,.85,1):desert?new Color4(.73,.79,.79,1):new Color4(.025,.045,.07,1);scene.fogColor=outdoors?new Color3(.63,.84,.90):cold?new Color3(.67,.78,.85):desert?new Color3(.73,.79,.79):new Color3(.025,.045,.07);scene.fogDensity=outdoors?.0035:cold?.0025:desert?.0018:.009;ambient.intensity=outdoors?.85:cold?.65:desert?.72:.75;ambient.diffuse=outdoors?new Color3(.92,.97,1):Color3.White();ambient.groundColor=outdoors?new Color3(.37,.40,.27):cold?new Color3(.48,.57,.63):desert?new Color3(.42,.36,.24):new Color3(.15,.2,.28);camera.maxZ=desert?500:outdoors||cold?340:150;pipeline.bloomWeight=outdoors?.13:cold?.10:desert?.09:.32;pipeline.bloomThreshold=outdoors||cold||desert?1.1:.7;makePickupMeshes();$('arena-name').textContent=map.name;}
+function setArena(name:string){map=arenas[name]??arenas.village;fortressEnvironment.setEnabled(map.id==='fortress');foundryEnvironment.setEnabled(map.id==='foundry');reactorVisual.setEnabled(map.id==='reactor');villageVisual.setEnabled(map.id==='village');outpostVisual.setEnabled(map.id==='outpost');outpostEnvironment.setEnabled(map.id==='outpost');const outdoors=map.id==='village';const cold=map.id==='outpost',desert=map.id==='canyon';canyonVisual.setEnabled(desert);canyonEnvironment.setEnabled(desert);villageEnvironment.setEnabled(outdoors);scene.clearColor=outdoors?new Color4(.63,.84,.90,1):cold?new Color4(.67,.78,.85,1):desert?new Color4(.73,.79,.79,1):new Color4(.025,.045,.07,1);scene.fogColor=outdoors?new Color3(.63,.84,.90):cold?new Color3(.67,.78,.85):desert?new Color3(.73,.79,.79):new Color3(.025,.045,.07);scene.fogDensity=outdoors?.0035:cold?.0025:desert?.0018:.009;ambient.intensity=outdoors?.85:cold?.65:desert?.72:.75;ambient.diffuse=outdoors?new Color3(.92,.97,1):Color3.White();ambient.groundColor=outdoors?new Color3(.37,.40,.27):cold?new Color3(.48,.57,.63):desert?new Color3(.42,.36,.24):new Color3(.15,.2,.28);camera.maxZ=desert?500:outdoors||cold?340:150;pipeline.bloomWeight=outdoors?.13:cold?.10:desert?.09:.32;pipeline.bloomThreshold=outdoors||cold||desert?1.1:.7;makePickupMeshes();$('arena-name').textContent=map.name;}
 const arenaSelect=$('map') as HTMLSelectElement;arenaSelect.onchange=()=>setArena(arenaSelect.value);setArena(arenaSelect.value);
 const gunRoot=new TransformNode('View weapon',scene);gunRoot.parent=camera;gunRoot.position.set(.32,-.29,.65);gunRoot.setEnabled(false);
 const basicWeapon=new TransformNode('Basic view weapons',scene);basicWeapon.parent=gunRoot;
@@ -148,7 +152,7 @@ engine.runRenderLoop(()=>{const dt=Math.min(engine.getDeltaTime()/1000,.05),lock
  if(me){camera.position.set(me.x,me.y+1.45,me.z);camera.rotation.set(pitch,yaw,0);gunRoot.setEnabled(me.hp>0);$('stats').textContent=me.hp>0?`${me.hp} HEALTH   /   ${weapon===1?'PULSE ∞':weapon===2?'ROCKETS '+me.launcherLoaded+' / '+Math.max(0,me.ammo-me.launcherLoaded):'PC-01 '+me.carbineClip+' / '+Math.max(0,me.carbineAmmo-me.carbineClip)}`:`RESPAWNING ${Math.max(1,Math.ceil(me.respawn))}…`;}
  if(me&&me.hp>0&&me.reloadLeft>0&&me.reloadWeapon===weapon)$('stats').textContent+='   RELOADING '+me.reloadLeft.toFixed(1)+'s';
  if(me&&me.hp>0&&me.spawnShield>0)$('stats').textContent+='   SPAWN SHIELD '+me.spawnShield.toFixed(1)+'s';
- }else if(!joined){netCooldown+=dt;if(map.id==='village'){camera.position.set(8+Math.sin(netCooldown*.025)*1.5,5,-22);camera.setTarget(new Vector3(0,3,16));}else if(map.id==='canyon'){camera.position.set(88*Math.sin(.7+netCooldown*.018),65,105*Math.cos(.7+netCooldown*.018));camera.setTarget(new Vector3(0,5,0));}else if(map.id==='outpost'){camera.position.set(32*Math.sin(.7+netCooldown*.025),35,45*Math.cos(.7+netCooldown*.025));camera.setTarget(new Vector3(0,14,0));}else{camera.position.set(Math.sin(netCooldown*.06)*32,24,Math.cos(netCooldown*.06)*32);camera.setTarget(new Vector3(0,1,0));}}
+ }else if(!joined){netCooldown+=dt;if(map.id==='village'){camera.position.set(8+Math.sin(netCooldown*.025)*1.5,5,-22);camera.setTarget(new Vector3(0,3,16));}else if(map.id==='foundry'){camera.position.set(27,7.5,-23);camera.setTarget(new Vector3(0,5,2));}else if(map.id==='fortress'){camera.position.set(15,5,-22);camera.setTarget(new Vector3(0,6,4));}else if(map.id==='canyon'){camera.position.set(88*Math.sin(.7+netCooldown*.018),65,105*Math.cos(.7+netCooldown*.018));camera.setTarget(new Vector3(0,5,0));}else if(map.id==='outpost'){camera.position.set(32*Math.sin(.7+netCooldown*.025),35,45*Math.cos(.7+netCooldown*.025));camera.setTarget(new Vector3(0,14,0));}else{camera.position.set(Math.sin(netCooldown*.06)*32,24,Math.cos(netCooldown*.06)*32);camera.setTarget(new Vector3(0,1,0));}}
  for(const r of remotes.values()){const p=r.metadata as Player,avatar=botAvatars.get(p.id);if(avatar){avatar.update(performance.now());continue;}const v=new Vector3(p.x,p.y,p.z);r.position=Vector3.Lerp(r.position,v,Math.min(1,dt*15));r.rotation.y=p.yaw;}
  if(launcherAvailable){launcherPickup.rotation.y+=dt*.65;launcherPickup.position.y=launcherBaseY+Math.sin(performance.now()*.002)*.1;}
  basicWeapon.setEnabled(weapon===1);launcherView.setEnabled(weapon===2);carbineView.setEnabled(weapon===3);if(pickupAvailable){carbinePickup.rotation.y+=dt*.8;carbinePickup.position.y=pickupBaseY+Math.sin(performance.now()*.002)*.1;}

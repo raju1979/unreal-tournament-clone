@@ -4,7 +4,7 @@ try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],packets=[];let core;
  page.on('request',r=>{if(r.url().includes('/@babylonjs_core.js?'))core=r.url()});page.on('pageerror',e=>errors.push(e.message));
  page.on('websocket',ws=>ws.on('framereceived',f=>{try{packets.push(JSON.parse(f.payload.toString()))}catch{}}));
- await page.goto('http://localhost:3000');await page.locator('#join:not([disabled])').waitFor({timeout:90000});assert.equal(await page.locator('#map option').count(),4);await page.selectOption('#map','canyon');
+ await page.goto('http://localhost:3000');await page.locator('#join:not([disabled])').waitFor({timeout:90000});assert.equal(await page.locator('#map option[value="canyon"]').count(),1);await page.selectOption('#map','canyon');
  await page.evaluate(async url=>{globalThis.canyonB=await import(url);globalThis.canyonScene=canyonB.EngineStore.LastCreatedScene},core);
  await page.waitForFunction(()=>canyonScene.meshes.some(m=>m.name.includes('canyon-Sunspire architecture')&&m.getTotalVertices()>0),null,{timeout:60000});
  const geometry=await page.evaluate(async()=>{

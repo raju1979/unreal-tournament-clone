@@ -1,6 +1,8 @@
 import {villageLayout} from './village-layout';
 import {outpostLayout} from './outpost-layout';
 import {canyonLayout} from './canyon-layout';
+import {fortressLayout} from './fortress-layout';
+import {foundryLayout} from './foundry-layout';
 export type Box={name:string,x:number,y:number,z:number,w:number,h:number,d:number,kind?:string};
 export type Arena={id:string,name:string,boxes:Box[],spawns:number[][],weaponSpawns:number[][],pickups:{x:number,y:number,z:number,type:string}[]};
 const boxes:Box[]=[];
@@ -17,4 +19,6 @@ export const reactor:Arena={id:'reactor',name:'Reactor',boxes,weaponSpawns:[[0,0
 export const village:Arena=villageLayout;
 export const outpost:Arena=outpostLayout;
 export const canyon:Arena=canyonLayout;
-export const arenas:Record<string,Arena>={reactor,village,outpost,canyon};
+export const fortress:Arena=fortressLayout;
+export const foundry:Arena=foundryLayout;
+export const arenas:Record<string,Arena>={reactor,village,outpost,canyon,fortress,foundry};

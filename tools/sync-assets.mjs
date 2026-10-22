@@ -1,4 +1,6 @@
 import {mkdirSync,copyFileSync} from 'node:fs';
+mkdirSync('public/assets/fortress',{recursive:true});
+copyFileSync('3d/fortress-arena/iron-veil-fortress.glb','public/assets/fortress/iron-veil-fortress.glb');
 mkdirSync('public/assets/weapons',{recursive:true});
 copyFileSync('3d/weapons/pulse-carbine/pulse-carbine.glb','public/assets/weapons/pulse-carbine.glb');
 copyFileSync('3d/weapons/rocket-launcher/rocket-launcher.glb','public/assets/weapons/rocket-launcher.glb');
@@ -16,3 +18,6 @@ copyFileSync('3d/canyon-arena/sunspire-arena.glb','public/assets/canyon/sunspire
 
 mkdirSync('public/assets/effects',{recursive:true});
 copyFileSync('3d/effects/rocket-explosion/rocket-explosion.png','public/assets/effects/rocket-explosion.png');
+
+mkdirSync('public/assets/foundry',{recursive:true});
+copyFileSync('3d/foundry-arena/ember-foundry.glb','public/assets/foundry/ember-foundry.glb');

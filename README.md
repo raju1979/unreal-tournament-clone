@@ -16,7 +16,7 @@ Alternatively: `npm ci`, `npm run build`, then `NODE_ENV=production npm start` o
 
 ## Add arenas
 
-`shared/maps.ts` is the map registry. An arena supplies a unique id, display name, box collision geometry, spawn positions (feet coordinates), and pickups. Renderer and simulation use the same geometry. Add another Arena entry to `arenas`, then add a room map selector/server validation and a client map loading transition. Four arenas are available: Reactor, Canal Village, Frostline Outpost, and Sunspire Battle Arena. Select a battleground before creating a room; its first player chooses the map.
+`shared/maps.ts` is the map registry. An arena supplies a unique id, display name, box collision geometry, spawn positions (feet coordinates), and pickups. Renderer and simulation use the same geometry. Add another Arena entry to `arenas`, then add a room map selector/server validation and a client map loading transition. Six arenas are available: Reactor, Canal Village, Frostline Outpost, Sunspire Battle Arena, Iron Veil Fortress, and Ember Foundry. Select a battleground before creating a room; its first player chooses the map.
 
 Coordinates are metres, Y up, +Z forward. Characters are 1.7 metres tall. Shared collision boxes must cover any solid imported scenery; imported GLB decorations do not automatically become server colliders. Map-specific decoration is currently authored in client/main.ts and should be extracted into a map scene builder when adding the next arena.
 
@@ -77,3 +77,13 @@ Rocket impacts use a Blender-simulated fire/smoke flipbook in all arenas, accomp
 Bots use short lateral dodges when hit, when an opponent fires toward them, or when a visible approaching rocket threatens their route. They can mix jumps into those dodges and occasionally hop in close combat or over an obstruction. Maneuvers use normal player movement and cooldowns. A preview of movement and landing rejects high drops, blocked escape routes and jumps under low ceilings. A dodge keeps the existing target, aiming and navigation goal; the scoreboard shows DODGE or JUMP while the maneuver is requested.
 
 Weapon locations are randomized at round setup and remain fixed during that round. After collection, the carbine returns in 20 seconds, the launcher in 25 seconds, and ammo packs in 8–18 seconds at their original spots. The server shares these timers with everyone in the room.
+
+
+## Iron Veil Fortress
+
+A dark medieval hall inspired by the supplied reference, with mossy stone, massive pillars, timber beams, torchlight, green rose windows, crimson banners, a safe shallow jade pool, and two elevated galleries. Select Iron Veil Fortress and use a new room name. Editable Blender source, generated textures, GLB, and rebuild details are in `3d/fortress-arena/README.md`.
+
+
+## Ember Foundry
+
+The sixth selectable arena is a 64 by 52 metre industrial hall with two orange furnaces, looping ground routes, two elevated gantries joined by a bridge, four stair approaches, cargo cover, overhead piping and a crane. Select Ember Foundry and create a new room. Editable Blender source, embedded generated textures, GLB and rebuilding instructions are in `3d/foundry-arena/README.md`.
