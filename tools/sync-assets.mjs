@@ -27,4 +27,6 @@ copyFileSync('3d/weapons/impact-hammer/impact-hammer.glb','public/assets/weapons
 mkdirSync('public/assets/avatars',{recursive:true});
 copyFileSync('3d/characters/azure-vanguard/azure-vanguard.glb','public/assets/avatars/azure-vanguard.glb');
 copyFileSync('3d/characters/azure-vanguard/preview.png','public/assets/avatars/azure-vanguard.png');
+copyFileSync('3d/characters/halo-warrior/halo-warrior.glb','public/assets/avatars/halo-warrior.glb');
+copyFileSync('3d/characters/halo-warrior/preview.png','public/assets/avatars/halo-warrior.png');
 copyFileSync('3d/characters/red-warden/preview.png','public/assets/avatars/red-warden.png');

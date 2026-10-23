@@ -101,4 +101,14 @@ Flying rockets leave a short grey smoke trail behind their exhaust. Puffs expand
 
 ## Player avatars
 
-Choose Red Warden or Azure Vanguard in the start menu before entering a room. The browser remembers your selection; the server validates and replicates it to other players, and respawning preserves it. Human characters now use animated models with held weapons, like the bots. Azure Vanguard is an original low-poly blue armored warrior inspired by the supplied reference, with 2,944 triangles, rigid armor skinning, UVs and shared armed locomotion. Add future choices in `shared/avatars.ts` and sync their source assets through `tools/sync-assets.mjs`; use the shared skeleton, animation names and hand socket. See `3d/characters/azure-vanguard/README.md`.
+Choose Red Warden, Azure Vanguard, or Halo Warrior in the start menu before entering a room. The browser remembers your selection; the server validates and replicates it to other players, and respawning preserves it. Human characters now use animated models with held weapons, like the bots. Azure Vanguard is an original low-poly blue armored warrior inspired by the supplied reference, with 2,944 triangles, rigid armor skinning, UVs and shared armed locomotion. Add future choices in `shared/avatars.ts` and sync their source assets through `tools/sync-assets.mjs`; use the shared skeleton, animation names and hand socket. See `3d/characters/azure-vanguard/README.md`.
+
+
+## Halo Warrior
+
+The third avatar is a low-poly olive-armored warrior based on the supplied Halo reference, with a curved gold visor, enclosed helmet, split chest plates, black undersuit and shared weapon-ready animations. Select Halo Warrior before joining a room. Editable source and rebuild instructions are in `3d/characters/halo-warrior/README.md`.
+
+
+## Random bot avatars
+
+Bots receive random characters from the player avatar roster when added to a room. Unused bot looks are preferred, so a solo match with three bots shows all three current avatars. A bot retains its appearance through deaths and round resets; newly filled slots get a fresh choice. The server replicates the assignment to all players. Future roster additions are included automatically.

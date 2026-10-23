@@ -25,8 +25,7 @@ Future characters should keep the same bone names, `Warden_WeaponSocket`,
 To extend the roster, add an entry in `shared/avatars.ts` and copy the GLB and
 portrait in `tools/sync-assets.mjs`. The menu builds its buttons from that roster,
 and the server automatically validates the new ID. Selection is made before
-joining, remembered in localStorage, and retained through respawns. Bots continue
-using Red Warden. The game is first-person, so your chosen body is seen by other
+joining, remembered in localStorage, and retained through respawns. Bots also choose random appearances from the roster. The game is first-person, so your chosen body is seen by other
 players; the portrait identifies your own selection before entering a match.
 
 Checks: `npm run check`, `npm test`, `npm run build`, and

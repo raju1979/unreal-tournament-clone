@@ -4,6 +4,7 @@ import {createServer} from 'node:http';
 import {randomUUID} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import {arenas} from '../shared/maps';
+import {randomAvatar} from '../shared/avatars';
 import {player,spawn,move,emptyInput,rayBox,type Player,type Input} from '../shared/game';
 import {tickWeaponPickup,type CarbinePickup} from '../shared/carbine';
 import {createWeaponPickups,collectArenaWeapon,type ArenaWeaponPickup} from '../shared/weapon-pickups';
@@ -19,7 +20,7 @@ const rooms=new Map<string,Room>();
 const navigations=new Map<string,Navigation>();
 function navFor(id:string){let nav=navigations.get(id);if(!nav){nav=new Navigation(arenas[id]);navigations.set(id,nav);}return nav;}
 function removeBot(r:Room){const id=r.brains.keys().next().value;if(id){r.brains.delete(id);r.players.delete(id);r.inputs.delete(id);r.shots.delete(id);}}
-function syncBots(r:Room){const desired=r.botsEnabled?Math.max(0,4-r.sockets.size):0;while(r.brains.size>desired)removeBot(r);while(r.brains.size<desired){const id='bot-'+randomUUID(),used=new Set([...r.players.values()].map(p=>p.name)),name=['Rook','Vex','Atlas'].find(n=>!used.has(n))??'Sentinel';const p=player(id,name);p.bot=true;p.botState='PATROL';const spots=[...arenas[r.map].spawns].sort((a,b)=>{const score=(s:number[])=>Math.min(...[...r.players.values()].map(q=>Math.hypot(q.x-s[0],q.z-s[2])));return score(b)-score(a);});if(spots[0])Object.assign(p,{x:spots[0][0],y:spots[0][1],z:spots[0][2]});r.players.set(id,p);r.brains.set(id,createBrain(p));r.inputs.set(id,emptyInput());}if(desired)navFor(r.map);}
+function syncBots(r:Room){const desired=r.botsEnabled?Math.max(0,4-r.sockets.size):0;while(r.brains.size>desired)removeBot(r);while(r.brains.size<desired){const id='bot-'+randomUUID(),used=new Set([...r.players.values()].map(p=>p.name)),name=['Rook','Vex','Atlas'].find(n=>!used.has(n))??'Sentinel';const p=player(id,name,randomAvatar([...r.players.values()].filter(q=>q.bot).map(q=>q.avatar)));p.bot=true;p.botState='PATROL';const spots=[...arenas[r.map].spawns].sort((a,b)=>{const score=(s:number[])=>Math.min(...[...r.players.values()].map(q=>Math.hypot(q.x-s[0],q.z-s[2])));return score(b)-score(a);});if(spots[0])Object.assign(p,{x:spots[0][0],y:spots[0][1],z:spots[0][2]});r.players.set(id,p);r.brains.set(id,createBrain(p));r.inputs.set(id,emptyInput());}if(desired)navFor(r.map);}
 function broadcast(r:Room,msg:unknown){const s=JSON.stringify(msg);for(const ws of r.sockets.values())if(ws.readyState===WebSocket.OPEN&&ws.bufferedAmount<100000)ws.send(s);}
 function damage(r:Room,target:Player,amount:number,owner:string){if(target.hp<=0)return;amount=incomingDamage(amount,r.players.get(owner)?.bot===true,target.bot===true,target.spawnShield);if(amount<=0)return;const brain=r.brains.get(target.id),attacker=r.players.get(owner);if(brain&&attacker&&owner!==target.id){brain.hurt=1.8;brain.threat={x:attacker.x,y:attacker.y,z:attacker.z};}target.hp=Math.max(0,target.hp-amount);if(!target.hp){target.deaths++;target.respawn=3;const killer=r.players.get(owner);if(killer)killer.kills+=owner===target.id?-1:1;broadcast(r,{type:'kill',text:`${killer?.name??'Arena'} → ${target.name}`});}}
 function wallDistance(r:Room,o:number[],d:number[]){return Math.min(120,...arenas[r.map].boxes.map(b=>rayBox(o,d,[b.x-b.w/2,b.y-b.h/2,b.z-b.d/2],[b.x+b.w/2,b.y+b.h/2,b.z+b.d/2])));}

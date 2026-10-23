@@ -153,7 +153,7 @@ for(const [id,definition] of Object.entries(avatars)){
 }
 function remote(p:Player){
  const root=new TransformNode(p.id,scene);root.position.set(p.x,p.y,p.z);root.rotation.y=p.yaw;let dock:TransformNode;
- const avatar=new BotAvatar(scene,root,p,avatarAsset(p.bot?'red-warden':avatarId(p.avatar)));botAvatars.set(p.id,avatar);dock=avatar.weaponDock;
+ const avatar=new BotAvatar(scene,root,p,avatarAsset(avatarId(p.avatar)));botAvatars.set(p.id,avatar);dock=avatar.weaponDock;
  remoteWeaponDocks.set(p.id,dock);
  const basic=new TransformNode('Remote pulse rifle',scene);basic.parent=dock;remoteBasicWeapons.set(p.id,basic);
  for(const [name,position,size,mat] of [['Remote rifle body',[0,.06,.16],[.15,.15,.43],dark],['Remote rifle barrel',[0,.07,.43],[.07,.07,.25],white],['Remote rifle grip',[0,-.065,0],[.08,.18,.09],dark],['Remote rifle rail',[0,.145,.22],[.025,.025,.36],cyan]] as const){const mesh=cube(name,[...position],[...size],mat);mesh.parent=basic;}
