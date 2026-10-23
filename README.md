@@ -112,3 +112,8 @@ The third avatar is a low-poly olive-armored warrior based on the supplied Halo 
 ## Random bot avatars
 
 Bots receive random characters from the player avatar roster when added to a room. Unused bot looks are preferred, so a solo match with three bots shows all three current avatars. A bot retains its appearance through deaths and round resets; newly filled slots get a fresh choice. The server replicates the assignment to all players. Future roster additions are included automatically.
+
+
+## Callsigns above characters
+
+Other players and bots display their callsigns on camera-facing labels above their heads. Text is drawn into a small world-space texture with a dark backing and a subtle amber (bot) or cyan (human) accent. Labels follow animated movement and jumps, obey world depth, fade from 32 to 44 metres, and hide on death/disconnection or while in the menu. They never affect targeting or hitboxes. `node tools/callsigns-browser.mjs` verifies bot and human labels and cleanup against a running local server.
