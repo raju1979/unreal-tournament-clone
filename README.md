@@ -87,3 +87,8 @@ A dark medieval hall inspired by the supplied reference, with mossy stone, massi
 ## Ember Foundry
 
 The sixth selectable arena is a 64 by 52 metre industrial hall with two orange furnaces, looping ground routes, two elevated gantries joined by a bridge, four stair approaches, cargo cover, overhead piping and a crane. Select Ember Foundry and create a new room. Editable Blender source, embedded generated textures, GLB and rebuilding instructions are in `3d/foundry-arena/README.md`.
+
+
+## Weapon pickups across all arenas
+
+Every clear authored weapon spawn is now populated at round setup, with all four weapon types represented: pulse rifle (1), launcher (2), carbine (3), and Impact Hammer (4). Additional positions repeat weapon types. Positions are assigned without overlap, remain fixed during the round, and are reshuffled together for the next round. Launcher and carbine pickups retain their 25s and 20s respawn timers; pulse and hammer pickups return after 12s. Pulse and hammer remain available from spawn; their world pickups equip them. Bots can seek every launcher/carbine location. Run `node tools/all-weapons-browser.mjs` against the local server to verify every arena and the new pickup models.

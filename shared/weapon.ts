@@ -7,7 +7,7 @@ export function weaponExtension(eye:number[],yaw:number,pitch:number,map:Arena,w
  const up=[Math.sin(yaw)*Math.sin(pitch),Math.cos(pitch),Math.cos(yaw)*Math.sin(pitch)];
  const forward=[Math.sin(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch)];
  const low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
- const bounds=weapon===2?[[.17,.47],[-.53,.04],[.19,1.13]]:[[.23,.41],[-.53,-.10],[.25,1.25]];
+ const bounds=weapon===4?[[.15,.49],[-.4,.13],[.25,1.53]]:weapon===2?[[.17,.47],[-.53,.04],[.19,1.13]]:[[.23,.41],[-.53,-.10],[.25,1.25]];
  for(const x of bounds[0])for(const y of bounds[1])for(const z of bounds[2]) {
   for(let a=0;a<3;a++){const v=right[a]*x+up[a]*y+forward[a]*z;low[a]=Math.min(low[a],v);high[a]=Math.max(high[a],v);}
  }

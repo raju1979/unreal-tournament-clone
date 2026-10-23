@@ -53,6 +53,7 @@ export class CombatEffects {
   const update=(_dt:number,age:number)=>{const head=Math.min(length,age*speed),tail=Math.max(0,head-.95);mesh.scaling.z=Math.max(.025,head-tail);mesh.position.copyFrom(from.add(direction.scale((head+tail)/2)));mesh.lookAt(mesh.position.add(direction));};
   update(0,.0001);this.add({mesh,age:0,life:Math.max(.085,flight),update,done:()=>{if(impact)this.impact(to,direction,hit);}});
  }
+ hammerImpact(at:Vector3,incoming:Vector3,hit:boolean){this.impact(at,incoming,hit);}
  private impact(at:Vector3,incoming:Vector3,hit:boolean){
   const burst=MeshBuilder.CreateSphere('FX impact core',{diameter:hit?.14:.09,segments:4},this.scene);burst.position.copyFrom(at.subtract(incoming.scale(.025)));burst.material=this.hot;
   this.add({mesh:burst,age:0,life:.07});

@@ -1,11 +1,12 @@
 import {emptyInput,rayBox,type Player,type Input} from '../shared/game';
 import type {Arena} from '../shared/maps';
 import type {CarbinePickup} from '../shared/carbine';
+import type {ArenaWeaponPickup} from '../shared/weapon-pickups';
 import {Navigation,type NavPoint} from './navigation';
 import {createManeuvers,applyManeuvers,type Maneuvers} from './bot-maneuvers';
 export const botTuning={reaction:.9,turnSpeed:1.9,aimError:.07,burstSeconds:.4,pauseSeconds:1};
 export type BotState='PATROL'|'SEEK_WEAPON'|'SEEK_AMMO'|'SEEK_HEALTH'|'CHASE'|'ATTACK'|'RETREAT'|'RELOAD'|'DEAD'|'DODGE'|'JUMP';
-export type BotWorld={map:Arena,players:Player[],pickups:number[],carbine:CarbinePickup,launcher:CarbinePickup,rockets?:{owner:string,x:number,y:number,z:number,dx:number,dy:number,dz:number}[],firing?:string[]};
+export type BotWorld={map:Arena,players:Player[],pickups:number[],carbine:CarbinePickup,launcher:CarbinePickup,weaponPickups?:ArenaWeaponPickup[],rockets?:{owner:string,x:number,y:number,z:number,dx:number,dy:number,dz:number}[],firing?:string[]};
 export type BotBrain={state:BotState,target?:string,lastSeen?:NavPoint,threat?:NavPoint,hurt:number,memory:number,reaction:number,time:number,phase:number,path:NavPoint[],goal?:NavPoint,repath:number,stuck:number,last:NavPoint,patrol:number} & Maneuvers;
 const distance=(a:NavPoint,b:NavPoint)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
 const angle=(a:number)=>Math.atan2(Math.sin(a),Math.cos(a));
@@ -33,7 +34,8 @@ export function thinkBot(p:Player,b:BotBrain,w:BotWorld,nav:Navigation,dt=.2,ran
  const range=enemy?distance(p,enemy):Infinity;
  i.weapon=p.reloadLeft>0?p.weapon:p.hasLauncher&&p.ammo>0&&range>8&&range<25?2:p.hasCarbine&&p.carbineAmmo>0?3:1;
  let goal:NavPoint|undefined;
- const nearbyWeapon=[...(!p.hasCarbine||p.carbineAmmo<6?[w.carbine]:[]),...(!p.hasLauncher||p.ammo===0?[w.launcher]:[])].filter(a=>a.cooldown===0&&distance(p,a)<10).sort((a,c)=>distance(p,a)-distance(p,c))[0];
+ const weaponOptions=[...(!p.hasCarbine||p.carbineAmmo<6?(w.weaponPickups?.filter(p=>p.weapon===3)??[w.carbine]):[]),...(!p.hasLauncher||p.ammo===0?(w.weaponPickups?.filter(p=>p.weapon===2)??[w.launcher]):[])];
+ const nearbyWeapon=weaponOptions.filter(a=>a.cooldown===0&&distance(p,a)<10).sort((a,c)=>distance(p,a)-distance(p,c))[0];
  const threat=enemy??(b.hurt>0?b.threat:undefined);
  if((p.hp<35||b.hurt>0)&&(threat||health)){b.state=threat?'RETREAT':'SEEK_HEALTH';if(threat){const candidates=nav.nodes.filter(n=>distance(p,n)>3&&distance(p,n)<13&&distance(threat,n)>5&&Math.abs(n.y-p.y)<1.4);candidates.sort((a,c)=>(Number(covered(c,threat,w.map))*100+distance(threat,c)*1.8-distance(p,c))-(Number(covered(a,threat,w.map))*100+distance(threat,a)*1.8-distance(p,a)));goal=candidates[0]??{x:p.x+(p.x-threat.x),y:p.y,z:p.z+(p.z-threat.z)};}else goal=health;}
  else if(p.reloadLeft>0&&p.reloadWeapon===p.weapon){b.state='RELOAD';if(enemy)goal={x:p.x+(p.x-enemy.x)*.4,y:p.y,z:p.z+(p.z-enemy.z)*.4};i.weapon=p.weapon;}
@@ -42,7 +44,7 @@ export function thinkBot(p:Player,b:BotBrain,w:BotWorld,nav:Navigation,dt=.2,ran
  else if(enemy){b.state=range>25?'CHASE':'ATTACK';const ideal=i.weapon===2?13:9,dx=(p.x-enemy.x)/Math.max(1,range),dz=(p.z-enemy.z)/Math.max(1,range),side=Math.sin(b.time*1.7+b.phase)>0?1:-1;goal={x:enemy.x+dx*ideal+dz*side*3,y:enemy.y,z:enemy.z+dz*ideal-dx*side*3};}
  else if(b.memory>0&&b.lastSeen&&distance(p,b.lastSeen)>1.5){b.state='CHASE';goal=b.lastSeen;}
  else if(health&&p.hp<75&&distance(p,health)<18){b.state='SEEK_HEALTH';goal=health;}
- else {const weapons=[...(!p.hasCarbine||p.carbineAmmo<6?[w.carbine]:[]),...(!p.hasLauncher||p.ammo===0?[w.launcher]:[])].filter(a=>a.cooldown===0).sort((a,c)=>distance(p,a)-distance(p,c));
+ else {const weapons=weaponOptions.filter(a=>a.cooldown===0).sort((a,c)=>distance(p,a)-distance(p,c));
   if(weapons.length){b.state='SEEK_WEAPON';goal=weapons[0];}
   else {b.state='PATROL';if(!b.goal||b.patrol<=0||distance(p,b.goal)<1){goal=nav.nodes[Math.floor(random()*nav.nodes.length)];b.patrol=6;}else goal=b.goal;}
  }

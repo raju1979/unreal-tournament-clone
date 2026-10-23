@@ -21,3 +21,5 @@ copyFileSync('3d/effects/rocket-explosion/rocket-explosion.png','public/assets/e
 
 mkdirSync('public/assets/foundry',{recursive:true});
 copyFileSync('3d/foundry-arena/ember-foundry.glb','public/assets/foundry/ember-foundry.glb');
+
+copyFileSync('3d/weapons/impact-hammer/impact-hammer.glb','public/assets/weapons/impact-hammer.glb');
