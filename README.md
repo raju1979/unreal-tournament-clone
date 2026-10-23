@@ -48,7 +48,7 @@ The old solid explosion sphere is replaced by procedural alpha-textured fire/smo
 
 ## Damage and reload balance
 
-Shared authoritative weapon configuration is in shared/weapons.ts. Pulse: 18 damage, 0.20s between shots, unlimited ammo. Carbine: 24 damage, 0.13s between shots, 18-round magazine, 1.5s reload. Launcher: 110 direct-hit damage, one rocket loaded, 2.2s automatic reload between rockets; splash damage falls from 90 to zero over 4.5m, is blocked by walls, and uses a 0.65 self-damage multiplier. Rockets use swept collision against players so direct hits receive damage once. Press R to reload a partial magazine; empty magazines reload automatically with reserve ammo. Switching weapons does not reset a running reload. HUD shows loaded/reserve ammo and reload countdown. See 3d/WEAPON-BALANCE.md for tuning notes.
+Shared authoritative weapon configuration is in shared/weapons.ts. Pulse: 18 damage, 0.20s between shots, unlimited ammo. Carbine: 24 damage, 0.13s between shots, 18-round magazine, 1.5s reload. Launcher: 150 direct-hit damage, one rocket loaded, 2.2s automatic reload between rockets; splash damage is 140 within 1m, then falls to zero at 5m (lethal against unshielded enemies within about 2m), is blocked by walls, and uses a 0.65 self-damage multiplier. Rockets use swept collision against players so direct hits receive damage once. Press R to reload a partial magazine; empty magazines reload automatically with reserve ammo. Switching weapons does not reset a running reload. HUD shows loaded/reserve ammo and reload countdown. See 3d/WEAPON-BALANCE.md for tuning notes.
 
 ## Solo practice bots
 
@@ -92,3 +92,13 @@ The sixth selectable arena is a 64 by 52 metre industrial hall with two orange f
 ## Weapon pickups across all arenas
 
 Every clear authored weapon spawn is now populated at round setup, with all four weapon types represented: pulse rifle (1), launcher (2), carbine (3), and Impact Hammer (4). Additional positions repeat weapon types. Positions are assigned without overlap, remain fixed during the round, and are reshuffled together for the next round. Launcher and carbine pickups retain their 25s and 20s respawn timers; pulse and hammer pickups return after 12s. Pulse and hammer remain available from spawn; their world pickups equip them. Bots can seek every launcher/carbine location. Run `node tools/all-weapons-browser.mjs` against the local server to verify every arena and the new pickup models.
+
+
+## Rocket smoke trails
+
+Flying rockets leave a short grey smoke trail behind their exhaust. Puffs expand, drift upward, and fade within 0.8 seconds, including after impact. Smoke is cosmetic and shared for local and remote rockets, with a cap of 80 smoke puffs inside the existing 160-effect budget. `npx tsx tools/effects-smoke.ts` checks fading, sizing, cleanup and bounds.
+
+
+## Player avatars
+
+Choose Red Warden or Azure Vanguard in the start menu before entering a room. The browser remembers your selection; the server validates and replicates it to other players, and respawning preserves it. Human characters now use animated models with held weapons, like the bots. Azure Vanguard is an original low-poly blue armored warrior inspired by the supplied reference, with 2,944 triangles, rigid armor skinning, UVs and shared armed locomotion. Add future choices in `shared/avatars.ts` and sync their source assets through `tools/sync-assets.mjs`; use the shared skeleton, animation names and hand socket. See `3d/characters/azure-vanguard/README.md`.

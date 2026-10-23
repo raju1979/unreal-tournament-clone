@@ -13,6 +13,7 @@ export class CombatEffects {
  private fire:StandardMaterial;
  private blastFlash:StandardMaterial;
  private smoke:StandardMaterial;
+ private rocketSmoke:StandardMaterial;
  private shock:StandardMaterial;
  private blastLight:PointLight;
  private blastTime=0;
@@ -29,6 +30,8 @@ export class CombatEffects {
    const i=(y*size+x)*4;data[i]=data[i+1]=data[i+2]=255;data[i+3]=Math.min(255,Math.round(a*255));
   }const texture=RawTexture.CreateRGBATexture(data,size,size,scene,false,false,Texture.BILINEAR_SAMPLINGMODE);texture.hasAlpha=true;return texture;};
   const puff=cloud();this.fire=make('FX / textured fire',new Color3(1,.24,.025));this.smoke=make('FX / textured smoke',new Color3(.10,.12,.14));this.shock=make('FX / blast wave',new Color3(.8,.7,.5));
+  this.rocketSmoke=make('FX / rocket smoke',new Color3(.42,.45,.47));
+  this.rocketSmoke.diffuseTexture=puff;this.rocketSmoke.useAlphaFromDiffuseTexture=true;this.rocketSmoke.backFaceCulling=false;
   this.blastFlash=make('FX / blast flash',new Color3(1,.85,.5));
   for(const m of [this.fire,this.smoke,this.shock,this.blastFlash]){m.diffuseTexture=m===this.shock?cloud(true):puff;m.useAlphaFromDiffuseTexture=true;m.backFaceCulling=false;}
   this.blastLight=new PointLight('FX / explosion light',Vector3.Zero(),scene);this.blastLight.intensity=0;this.blastLight.range=12;this.blastLight.diffuse=new Color3(1,.3,.06);this.blastLight.renderPriority=101;
@@ -52,6 +55,20 @@ export class CombatEffects {
   const mesh=MeshBuilder.CreateBox('FX bullet tracer',{width:.018,height:.018,depth:1},this.scene);mesh.material=weapon===1?this.cyan:this.amber;
   const update=(_dt:number,age:number)=>{const head=Math.min(length,age*speed),tail=Math.max(0,head-.95);mesh.scaling.z=Math.max(.025,head-tail);mesh.position.copyFrom(from.add(direction.scale((head+tail)/2)));mesh.lookAt(mesh.position.add(direction));};
   update(0,.0001);this.add({mesh,age:0,life:Math.max(.085,flight),update,done:()=>{if(impact)this.impact(to,direction,hit);}});
+ }
+ rocketTrail(from:Vector3,to:Vector3,direction:Vector3){
+  const distance=Vector3.Distance(from,to);if(distance<.03||distance>5)return;
+  const count=Math.min(18,Math.ceil(distance/.25)),tail=direction.normalizeToNew().scale(.45);
+  for(let i=1;i<=count;i++){
+   // Reserve room for flashes and impacts instead of letting trails crowd them out.
+   const smoke=this.effects.filter(e=>e.mesh.name==='FX rocket smoke trail');
+   if(smoke.length>=80){const oldest=smoke[0];oldest.mesh.dispose();this.effects.splice(this.effects.indexOf(oldest),1);}
+   const puff=MeshBuilder.CreatePlane('FX rocket smoke trail',{size:1},this.scene),life=.65+Math.random()*.15;
+   puff.material=this.rocketSmoke;puff.billboardMode=Mesh.BILLBOARDMODE_ALL;
+   puff.position.copyFrom(Vector3.Lerp(from,to,i/count).subtract(tail));puff.rotation.z=Math.random()*Math.PI;
+   puff.scaling.setAll(.20);puff.visibility=.55;
+   this.add({mesh:puff,age:0,life,update:(dt,age)=>{puff.position.y+=dt*.22;puff.scaling.setAll(.20+age*.75);puff.visibility=.55*Math.pow(1-age/life,1.4);}});
+  }
  }
  hammerImpact(at:Vector3,incoming:Vector3,hit:boolean){this.impact(at,incoming,hit);}
  private impact(at:Vector3,incoming:Vector3,hit:boolean){

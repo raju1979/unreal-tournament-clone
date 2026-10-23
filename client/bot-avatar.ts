@@ -43,10 +43,10 @@ export class BotAvatar {
    for(const g of this.groups){
     g.stop();const tracks=new Map<string,Track>();
     for(const t of g.targetedAnimations){const property=t.animation.targetProperty as Property;if(!['position','rotationQuaternion','scaling'].includes(property))continue;const track={target:t.target as TransformNode,property,animation:t.animation},key=track.target.uniqueId+':'+property;tracks.set(key,track);this.bindings.set(key,track);}
-    this.clips.set(g.name.replace(/^warden-/,'').replace(/^.*\|/,'').replace(/^Warden_/,''),{from:g.from,to:g.to,tracks});
+    this.clips.set(g.name.replace(/^warden-/,'').replace(/^.*\|/,'').replace(/^Warden_/,'').replace(/\.\d+$/,''),{from:g.from,to:g.to,tracks});
    }
-   const socket=this.model.getDescendants().find(n=>n.name==='warden-Warden_WeaponSocket') as TransformNode|undefined;
-   if(!socket)throw Error('Red Warden hand socket missing. Rebuild the bot assets.');
+   const socket=this.model.getDescendants().find(n=>n.name.startsWith('warden-Warden_WeaponSocket')) as TransformNode|undefined;
+   if(!socket)throw Error('Character hand socket missing. Rebuild the avatar assets.');
    this.grip.parent=socket;this.grip.position.setAll(0);this.grip.rotation.setAll(0);
    this.spine=this.model.getDescendants().find(n=>n.name==='warden-spine') as TransformNode|undefined;
    this.applyPose('Idle','Idle',0,0,0,0);

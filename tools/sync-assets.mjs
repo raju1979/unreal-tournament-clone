@@ -23,3 +23,8 @@ mkdirSync('public/assets/foundry',{recursive:true});
 copyFileSync('3d/foundry-arena/ember-foundry.glb','public/assets/foundry/ember-foundry.glb');
 
 copyFileSync('3d/weapons/impact-hammer/impact-hammer.glb','public/assets/weapons/impact-hammer.glb');
+
+mkdirSync('public/assets/avatars',{recursive:true});
+copyFileSync('3d/characters/azure-vanguard/azure-vanguard.glb','public/assets/avatars/azure-vanguard.glb');
+copyFileSync('3d/characters/azure-vanguard/preview.png','public/assets/avatars/azure-vanguard.png');
+copyFileSync('3d/characters/red-warden/preview.png','public/assets/avatars/red-warden.png');

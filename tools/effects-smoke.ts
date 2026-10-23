@@ -7,5 +7,14 @@ fx.update(.016);assert.ok(scene.meshes.find(m=>m.name==='FX bullet tracer')!.pos
 for(let i=0;i<8;i++)fx.update(.016);assert.ok(scene.meshes.some(m=>m.name==='FX impact spark'));
 for(let i=0;i<100;i++)fx.update(.016);assert.equal(scene.meshes.length,0);assert.equal(scene.getLightByName('FX / muzzle light')!.intensity,0);
 for(let i=0;i<100;i++)fx.flash(socket,1);assert.ok(scene.meshes.length<=160);fx.update(1);assert.equal(scene.meshes.length,0);
-fx.explosion(new Vector3(2,1,3));assert.ok(scene.meshes.some(m=>m.name==='FX smoke puff'));assert.ok(scene.meshes.some(m=>m.name==='FX shockwave'));assert.ok(!scene.meshes.some(m=>m.name==='Blast'));fx.update(.1);assert.ok(scene.meshes.some(m=>m.name==='FX fire puff'));for(let i=0;i<200;i++)fx.update(.016);assert.equal(scene.meshes.length,0);assert.equal(scene.getLightByName('FX / explosion light')!.intensity,0);
+fx.explosion(new Vector3(2,1,3));assert.ok(scene.meshes.some(m=>m.name==='FX smoke puff')||scene.spriteManagers?.some(m=>m.sprites.length>0));assert.ok(scene.meshes.some(m=>m.name==='FX shockwave'));assert.ok(!scene.meshes.some(m=>m.name==='Blast'));fx.update(.1);assert.ok(scene.meshes.some(m=>m.name==='FX fire puff')||scene.spriteManagers?.some(m=>m.sprites.length>0));for(let i=0;i<200;i++)fx.update(.016);assert.equal(scene.meshes.length,0);assert.equal(scene.getLightByName('FX / explosion light')!.intensity,0);
+fx.rocketTrail(new Vector3(0,2,0),new Vector3(0,2,1.2),new Vector3(0,0,1));
+const trail=scene.meshes.filter(m=>m.name==='FX rocket smoke trail');assert.ok(trail.length>=4);
+assert.ok(trail.every(m=>m.position.z<1.2&&!m.isPickable));
+const size=trail[0].scaling.x,opacity=trail[0].visibility;fx.update(.2);
+assert.ok(trail[0].scaling.x>size&&trail[0].visibility<opacity);
+for(let i=0;i<100;i++)fx.rocketTrail(new Vector3(0,2,0),new Vector3(0,2,1.2),new Vector3(0,0,1));
+assert.ok(scene.meshes.filter(m=>m.name==='FX rocket smoke trail').length<=80);
+fx.update(1);assert.equal(scene.meshes.length,0);
+fx.rocketTrail(Vector3.Zero(),new Vector3(100,0,0),new Vector3(1,0,0));assert.equal(scene.meshes.length,0);
 scene.dispose();engine.dispose();console.log('PASS: muzzle/tracers, layered explosion, smoke/shockwave, bounded effects, lights and cleanup');

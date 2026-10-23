@@ -2,12 +2,12 @@ import type {Player} from './game';
 
 export const weaponStats:Record<number,{name:string,damage:number,interval:number,magazine:number,reload:number}>={
  1:{name:'Pulse rifle',damage:18,interval:.20,magazine:0,reload:0},
- 2:{name:'RL-01 launcher',damage:110,interval:.65,magazine:1,reload:2.2},
+ 2:{name:'RL-01 launcher',damage:150,interval:.65,magazine:1,reload:2.2},
  4:{name:'Impact Hammer',damage:135,interval:.65,magazine:0,reload:0},
  3:{name:'PC-01 carbine',damage:24,interval:.13,magazine:18,reload:1.5},
 };
-export const rocketStats={speed:24,lifetime:4,splashDamage:90,splashRadius:4.5,selfDamageScale:.65};
-export function splashDamage(distance:number,self=false){return Math.round(rocketStats.splashDamage*Math.max(0,1-distance/rocketStats.splashRadius)*(self?rocketStats.selfDamageScale:1));}
+export const rocketStats={speed:24,lifetime:4,splashDamage:140,splashRadius:5,splashFullDamageRadius:1,selfDamageScale:.65};
+export function splashDamage(distance:number,self=false){return Math.round(rocketStats.splashDamage*Math.max(0,1-Math.max(0,distance-rocketStats.splashFullDamageRadius)/(rocketStats.splashRadius-rocketStats.splashFullDamageRadius))*(self?rocketStats.selfDamageScale:1));}
 export function beginReload(p:Player,weapon=p.weapon){
  if(p.hp<=0||p.reloadLeft>0||(weapon===1||weapon===4))return false;
  const total=weapon===2?p.ammo:p.carbineAmmo,loaded=weapon===2?p.launcherLoaded:p.carbineClip;
