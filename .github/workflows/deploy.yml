@@ -1,0 +1,129 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        env:
+          VITE_WS_URL: wss://unreal-api.ajarafashion.com/ws
+        run: npm run build
+
+      - name: Package frontend
+        run: (cd dist && zip -qr ../unreal-frontend.zip .)
+
+      - name: Check deployment secrets
+        id: deployment
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          [[ -n "$HOSTINGER_API_TOKEN" ]] || missing+=(HOSTINGER_API_TOKEN)
+          [[ -n "$VPS_DEPLOY_KEY" ]] || missing+=(VPS_DEPLOY_KEY)
+          [[ -n "$VPS_KNOWN_HOSTS" ]] || missing+=(VPS_KNOWN_HOSTS)
+          if ((${#missing[@]})); then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo "::notice::Deployment skipped. Add these repository secrets: ${missing[*]}"
+          else
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy frontend to Hostinger
+        if: steps.deployment.outputs.ready == 'true'
+        env:
+          HOSTINGER_API_TOKEN: ${{ secrets.HOSTINGER_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          api_base='https://developers.hostinger.com'
+          username='u409673832'
+          domain='unreal.ajarafashion.com'
+          archive='unreal-frontend.zip'
+
+          upload=$(curl --fail-with-body --silent --show-error \
+            --request POST "$api_base/api/hosting/v1/files/upload-urls" \
+            --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data "{\"username\":\"$username\",\"domain\":\"$domain\"}")
+          upload_url=$(jq -er '.url' <<<"$upload")
+          auth_key=$(jq -er '.auth_key' <<<"$upload")
+          rest_auth_key=$(jq -er '.rest_auth_key' <<<"$upload")
+          file_size=$(stat -c '%s' "$archive")
+          target="${upload_url%/}/$archive?override=true"
+
+          created=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request POST "$target" \
+            --header "X-Auth: $auth_key" \
+            --header "X-Auth-Rest: $rest_auth_key" \
+            --header 'Tus-Resumable: 1.0.0' \
+            --header "Upload-Length: $file_size" \
+            --header 'Upload-Offset: 0')
+          test "$created" = '201'
+
+          uploaded=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --request PATCH "$target" \
+            --header "X-Auth: $auth_key" \
+            --header "X-Auth-Rest: $rest_auth_key" \
+            --header 'Tus-Resumable: 1.0.0' \
+            --header 'Content-Type: application/offset+octet-stream' \
+            --header 'Upload-Offset: 0' \
+            --data-binary "@$archive")
+          test "$uploaded" = '204'
+
+          curl --fail-with-body --silent --show-error \
+            --request POST "$api_base/api/hosting/v1/accounts/$username/websites/$domain/deploy" \
+            --header "Authorization: Bearer $HOSTINGER_API_TOKEN" \
+            --header 'Content-Type: application/json' \
+            --data "{\"archive_path\":\"$archive\"}"
+
+      - name: Configure SSH
+        if: steps.deployment.outputs.ready == 'true'
+        env:
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy backend to VPS
+        if: steps.deployment.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(-i "$HOME/.ssh/id_ed25519" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          rsync -az -e "ssh ${ssh_options[*]}" \
+            package.json package-lock.json tsconfig.json server shared \
+            unreal-deploy@65.75.203.202:/opt/unreal-arena/
+          ssh "${ssh_options[@]}" unreal-deploy@65.75.203.202 'set -e; cd /opt/unreal-arena; npm ci; sudo -n /usr/bin/systemctl restart unreal-arena.service; for i in {1..15}; do curl -fsS http://127.0.0.1:3001/health && exit 0; sleep 1; done; exit 1'

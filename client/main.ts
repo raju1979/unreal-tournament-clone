@@ -166,7 +166,7 @@ function remote(p:Player){
 function feed(text:string){$('feed').textContent=text;setTimeout(()=>{if($('feed').textContent===text)$('feed').textContent='';},4500);}
 
 const button=$('join') as HTMLButtonElement;button.disabled=false;button.textContent='ENTER ARENA';$('message').textContent=`${renderer} ready · 4 players per room · First to 20 / 10 minutes`;
-button.onclick=()=>{if(joined){canvas.requestPointerLock();$('menu').style.display='none';return;}button.disabled=true;button.textContent='CONNECTING…';socket=new WebSocket(`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`);
+button.onclick=()=>{if(joined){canvas.requestPointerLock();$('menu').style.display='none';return;}button.disabled=true;button.textContent='CONNECTING…';socket=new WebSocket(import.meta.env.VITE_WS_URL||`${location.protocol==='https:'?'wss':'ws'}://${location.host}/ws`);
  socket.onopen=()=>socket!.send(JSON.stringify({type:'join',name:($('name') as HTMLInputElement).value,room:($('room') as HTMLInputElement).value,bots:($('bots') as HTMLInputElement).checked,avatar:selectedAvatar,map:arenaSelect.value}));
  socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='welcome'){id=m.id;if(m.map){setArena(m.map);arenaSelect.value=m.map;}arenaSelect.disabled=true;yaw=m.yaw??0;pitch=0;joined=true;pending=[];$('menu').style.display='none';canvas.requestPointerLock();tone(400);}
  if(m.type==='launcher'){weapon=2;feed(m.text);tone(480,.15);}

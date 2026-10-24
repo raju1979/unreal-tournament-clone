@@ -14,6 +14,8 @@ Copy this project to the Linux VPS, install Docker with Compose, and run `docker
 
 Alternatively: `npm ci`, `npm run build`, then `NODE_ENV=production npm start` on Linux. Run that process under your normal service manager and reverse proxy.
 
+When the browser client is hosted on a different origin from the game server, set `VITE_WS_URL` at build time to the secure WebSocket endpoint, for example `VITE_WS_URL=wss://game-api.example.com/ws npm run build`. The server accepts `HOST` and `PORT` environment variables; set `HOST=127.0.0.1` when a local reverse proxy such as Caddy handles public traffic.
+
 ## Add arenas
 
 `shared/maps.ts` is the map registry. An arena supplies a unique id, display name, box collision geometry, spawn positions (feet coordinates), and pickups. Renderer and simulation use the same geometry. Add another Arena entry to `arenas`, then add a room map selector/server validation and a client map loading transition. Six arenas are available: Reactor, Canal Village, Frostline Outpost, Sunspire Battle Arena, Iron Veil Fortress, and Ember Foundry. Select a battleground before creating a room; its first player chooses the map.

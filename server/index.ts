@@ -76,4 +76,4 @@ let previous=performance.now(),accumulator=0;
 setInterval(()=>{const now=performance.now();accumulator+=Math.min((now-previous)/1000,.25);previous=now;while(accumulator>=1/60){tick();accumulator-=1/60;}},4);
 app.get('/health',(_req,res)=>res.json({ok:true,rooms:rooms.size}));
 if(process.env.NODE_ENV==='production')app.use(express.static('dist'));else{const {createServer}=await import('vite');const vite=await createServer({server:{middlewareMode:true},appType:'spa'});app.use(vite.middlewares);}
-http.listen(Number(process.env.PORT??3000),'0.0.0.0',()=>console.log('Reactor Arena: http://localhost:3000'));
+http.listen(Number(process.env.PORT??3000),process.env.HOST??'0.0.0.0',()=>console.log(`Reactor Arena: http://${process.env.HOST??'localhost'}:${process.env.PORT??3000}`));
