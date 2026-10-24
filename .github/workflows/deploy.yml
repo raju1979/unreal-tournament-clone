@@ -123,7 +123,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh_options=(-i "$HOME/.ssh/id_ed25519" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
-          rsync -az -e "ssh ${ssh_options[*]}" \
+          rsync -rz -e "ssh ${ssh_options[*]}" \
             package.json package-lock.json tsconfig.json server shared \
             unreal-deploy@65.75.203.202:/opt/unreal-arena/
           ssh "${ssh_options[@]}" unreal-deploy@65.75.203.202 'set -e; cd /opt/unreal-arena; npm ci; sudo -n /usr/bin/systemctl restart unreal-arena.service; for i in {1..15}; do curl -fsS http://127.0.0.1:3001/health && exit 0; sleep 1; done; exit 1'
